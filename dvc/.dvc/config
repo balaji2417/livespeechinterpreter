@@ -1,0 +1,5 @@
+[core]
+    remote = gcs_remote
+['remote "gcs_remote"']
+    url = gs://livespeechinterpreter/dvc-cache
+    credentialpath = ../gcp-key.json
