@@ -1,0 +1,23 @@
+#create env
+activate env:
+source mlops_env/bin/activate
+#start airflow
+docker compose up -d --no-build
+#open
+http://localhost:8080
+#stop
+docker compose down
+#live api
+https://translation-api-1050963407386.us-central1.run.app
+# Health check
+curl https://translation-api-1050963407386.us-central1.run.app/health
+
+# Medical EN→ES
+curl -X POST https://translation-api-1050963407386.us-central1.run.app/translate \
+  -H "Content-Type: application/json" \
+  -d '{"text": "The patient requires immediate surgery.", "direction": "en_to_es", "domain": "medical"}'
+
+# Legal ES→EN
+curl -X POST https://translation-api-1050963407386.us-central1.run.app/translate \
+  -H "Content-Type: application/json" \
+  -d '{"text": "El contrato debe ser firmado antes del viernes.", "direction": "es_to_en", "domain": "legal"}'
