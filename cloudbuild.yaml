@@ -1,145 +1,341 @@
+FROM python:3.10-slim
+ 
+WORKDIR /app
+ 
+RUN apt-get update && apt-get install -y \
+
+    build-essential \
+
+    git \
+&& apt-get clean \
+&& rm -rf /var/lib/apt/lists/*
+ 
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+ 
+COPY train.py .
+ 
+ENTRYPOINT ["python", "train.py"]
+ 
+git add training/Dockerfile 
+git commit -m "fix: use python:3.10-slim base for training container" 
+git push origin main
+ 
+replace the training/Dockerfile with this
+Suchitra Hole
+FROM python:3.10-slim     WORKDIR /app     RUN apt-get update && apt-get install -y \      build-essential \      git \      && apt-get clean \      && rm -rf /var/lib/apt/lists/*     COPY requirements.txt .  RUN pip install --no-cache-dir -r requirements.txt     COPY train.py .
+ 
+ 
 steps:
+ 
+  # ── Step 1: Lint ──────────────────────────────────────────────────────────
 
-  # ── Step 1: Lint scripts ───────────────────────────────────────────────────
   - name: 'python:3.10'
+
     id: 'lint-scripts'
+
     entrypoint: 'bash'
+
     args:
+
       - '-c'
+
       - |
+
         pip install pyflakes --quiet
+
         python -m pyflakes scripts/ || true
+
         python -m pyflakes dags/ || true
+
         echo "Lint complete"
+ 
+  # ── Step 2: Run tests ─────────────────────────────────────────────────────
 
-  # ── Step 2: Run tests ──────────────────────────────────────────────────────
   - name: 'python:3.10'
+
     id: 'run-tests'
+
     entrypoint: 'bash'
+
     args:
+
       - '-c'
+
       - |
+
         pip install pytest --quiet
+
         if [ -d "tests/" ]; then
+
           pytest tests/ -v
+
         else
+
           echo "No tests directory — skipping"
+
         fi
+ 
+  # ── Step 3: Build training image ONLY if training/ changed ────────────────
 
-  # ── Step 3: Build training container ──────────────────────────────────────
   - name: 'gcr.io/cloud-builders/docker'
+
     id: 'build-training-image'
-    args:
-      - 'build'
-      - '--platform'
-      - 'linux/amd64'
-      - '--no-cache'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/mlops-489703/translation-models/gemma-trainer:$SHORT_SHA'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/mlops-489703/translation-models/gemma-trainer:latest'
-      - './training'
 
-  # ── Step 4: Push training container ───────────────────────────────────────
+    entrypoint: 'bash'
+
+    args:
+
+      - '-c'
+
+      - |
+
+        if git diff --name-only HEAD~1 HEAD | grep -q "^training/"; then
+
+          echo "training/ changed — rebuilding training image"
+
+          docker build \
+
+            --platform linux/amd64 \
+
+            --no-cache \
+
+            -t us-central1-docker.pkg.dev/mlops-489703/translation-models/gemma-trainer:$SHORT_SHA \
+
+            -t us-central1-docker.pkg.dev/mlops-489703/translation-models/gemma-trainer:latest \
+
+            ./training
+
+        else
+
+          echo "training/ unchanged — skipping training image build"
+
+        fi
+ 
+  # ── Step 4: Push training image ONLY if it was built ─────────────────────
+
   - name: 'gcr.io/cloud-builders/docker'
+
     id: 'push-training-image'
-    args:
-      - 'push'
-      - 'us-central1-docker.pkg.dev/mlops-489703/translation-models/gemma-trainer:$SHORT_SHA'
 
-  # ── Step 5: Build inference container ─────────────────────────────────────
+    entrypoint: 'bash'
+
+    args:
+
+      - '-c'
+
+      - |
+
+        if git diff --name-only HEAD~1 HEAD | grep -q "^training/"; then
+
+          docker push us-central1-docker.pkg.dev/mlops-489703/translation-models/gemma-trainer:$SHORT_SHA
+
+          echo "Training image pushed"
+
+        else
+
+          echo "Skipping push — training image not rebuilt"
+
+        fi
+ 
+  # ── Step 5: Build inference image ONLY if inference/ changed ─────────────
+
   - name: 'gcr.io/cloud-builders/docker'
+
     id: 'build-inference-image'
-    args:
-      - 'build'
-      - '--platform'
-      - 'linux/amd64'
-      - '--no-cache'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/mlops-489703/translation-models/inference-api:$SHORT_SHA'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/mlops-489703/translation-models/inference-api:latest'
-      - './inference'
 
-  # ── Step 6: Push inference container ──────────────────────────────────────
+    entrypoint: 'bash'
+
+    args:
+
+      - '-c'
+
+      - |
+
+        if git diff --name-only HEAD~1 HEAD | grep -q "^inference/"; then
+
+          echo "inference/ changed — rebuilding inference image"
+
+          docker build \
+
+            --platform linux/amd64 \
+
+            --no-cache \
+
+            -t us-central1-docker.pkg.dev/mlops-489703/translation-models/inference-api:$SHORT_SHA \
+
+            -t us-central1-docker.pkg.dev/mlops-489703/translation-models/inference-api:latest \
+
+            ./inference
+
+        else
+
+          echo "inference/ unchanged — skipping inference image build"
+
+        fi
+ 
+  # ── Step 6: Push inference image ONLY if it was built ────────────────────
+
   - name: 'gcr.io/cloud-builders/docker'
+
     id: 'push-inference-image'
-    args:
-      - 'push'
-      - 'us-central1-docker.pkg.dev/mlops-489703/translation-models/inference-api:$SHORT_SHA'
 
-  # ── Step 7: Evaluate model + bias gate ────────────────────────────────────
+    entrypoint: 'bash'
+
+    args:
+
+      - '-c'
+
+      - |
+
+        if git diff --name-only HEAD~1 HEAD | grep -q "^inference/"; then
+
+          docker push us-central1-docker.pkg.dev/mlops-489703/translation-models/inference-api:$SHORT_SHA
+
+          echo "Inference image pushed"
+
+        else
+
+          echo "Skipping push — inference image not rebuilt"
+
+        fi
+ 
+  # ── Step 7: Evaluate model ONLY if training/ or scripts/ changed ──────────
+
   - name: 'python:3.10'
+
     id: 'evaluate-model'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        pip install google-cloud-storage sacrebleu --quiet
-        python scripts/evaluate_model.py \
-          --model_gcs=gs://livespeechinterpreter-training/models/gemma3-4b-translation-v17 \
-          --test_gcs=gs://livespeechinterpreter/datasets/v2_approved/test.jsonl \
-          --slices_gcs=gs://livespeechinterpreter/datasets/v2_approved \
-          --bleu_threshold=25 \
-          --bias_threshold=0.30
 
-  # ── Step 8: Deploy to Cloud Run ───────────────────────────────────────────
+    entrypoint: 'bash'
+
+    args:
+
+      - '-c'
+
+      - |
+
+        if git diff --name-only HEAD~1 HEAD | grep -qE "^(training/|scripts/)"; then
+
+          pip install google-cloud-storage sacrebleu --quiet
+
+          python scripts/evaluate_model.py \
+
+            --model_gcs=gs://livespeechinterpreter-training/models/gemma3-4b-translation-v17 \
+
+            --test_gcs=gs://livespeechinterpreter/datasets/v2_approved/test.jsonl \
+
+            --slices_gcs=gs://livespeechinterpreter/datasets/v2_approved \
+
+            --bleu_threshold=25 \
+
+            --bias_threshold=0.30
+
+        else
+
+          echo "No model changes — skipping evaluation"
+
+        fi
+ 
+  # ── Step 8: Deploy ONLY if inference/ changed ────────────────────────────
+
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+
     id: 'deploy-cloud-run'
-    entrypoint: 'gcloud'
-    args:
-      - 'run'
-      - 'deploy'
-      - 'translation-api'
-      - '--image=us-central1-docker.pkg.dev/mlops-489703/translation-models/inference-api:$SHORT_SHA'
-      - '--platform=managed'
-      - '--region=us-central1'
-      - '--memory=16Gi'
-      - '--cpu=4'
-      - '--timeout=300'
-      - '--min-instances=1'
-      - '--max-instances=2'
-      - '--service-account=mlops-pipeline@mlops-489703.iam.gserviceaccount.com'
-      - '--set-env-vars=ADAPTER_GCS=gs://livespeechinterpreter-training/models/gemma3-4b-translation-v17,PROJECT_ID=mlops-489703,BQ_DATASET=translation_monitoring,BQ_TABLE=inference_logs,TOKENIZERS_PARALLELISM=false,HF_TOKEN=$$HF_TOKEN'
-      - '--allow-unauthenticated'
-    secretEnv: ['HF_TOKEN']
 
-  # ── Step 9: Log build to BigQuery ─────────────────────────────────────────
-  - name: 'python:3.10'
-    id: 'log-build'
     entrypoint: 'bash'
+
     args:
+
       - '-c'
+
       - |
+
+        if git diff --name-only HEAD~1 HEAD | grep -q "^inference/"; then
+
+          gcloud run deploy translation-api \
+
+            --image=us-central1-docker.pkg.dev/mlops-489703/translation-models/inference-api:$SHORT_SHA \
+
+            --platform=managed \
+
+            --region=us-central1 \
+
+            --memory=16Gi \
+
+            --cpu=4 \
+
+            --timeout=300 \
+
+            --min-instances=1 \
+
+            --max-instances=2 \
+
+            --service-account=mlops-pipeline@mlops-489703.iam.gserviceaccount.com \
+
+            --set-env-vars=ADAPTER_GCS=gs://livespeechinterpreter-training/models/gemma3-4b-translation-v17,PROJECT_ID=mlops-489703,BQ_DATASET=translation_monitoring,BQ_TABLE=inference_logs,TOKENIZERS_PARALLELISM=false \
+
+            --allow-unauthenticated
+
+        else
+
+          echo "inference/ unchanged — skipping Cloud Run deploy"
+
+        fi
+ 
+  # ── Step 9: Log build ─────────────────────────────────────────────────────
+
+  - name: 'python:3.10'
+
+    id: 'log-build'
+
+    entrypoint: 'bash'
+
+    args:
+
+      - '-c'
+
+      - |
+
         pip install google-cloud-bigquery --quiet
+
         python -c "
+
         from google.cloud import bigquery
+
         from datetime import datetime
+
         client = bigquery.Client(project='mlops-489703')
+
         table_id = 'mlops-489703.translation_monitoring.cicd_builds'
-        rows = [{
-          'timestamp': datetime.utcnow().isoformat(),
-          'commit_sha': '$SHORT_SHA',
-          'branch': '$BRANCH_NAME',
-          'build_id': '$BUILD_ID',
-          'status': 'SUCCESS',
-          'trigger': 'github_push'
-        }]
+
+        rows = [{'timestamp': datetime.utcnow().isoformat(), 'commit_sha': '$SHORT_SHA', 'branch': '$BRANCH_NAME', 'build_id': '$BUILD_ID', 'status': 'SUCCESS', 'trigger': 'github_push'}]
+
         client.insert_rows_json(table_id, rows)
+
         print('Build logged to BigQuery')
+
         "
-
+ 
 availableSecrets:
+
   secretManager:
+
     - versionName: projects/mlops-489703/secrets/HF_TOKEN/versions/latest
+
       env: 'HF_TOKEN'
-
+ 
 substitutions:
+
   _REGION: 'us-central1'
+
   _PROJECT: 'mlops-489703'
-
+ 
 options:
-  logging: CLOUD_LOGGING_ONLY
-  machineType: 'E2_HIGHCPU_8'
 
+  logging: CLOUD_LOGGING_ONLY
+
+  machineType: 'E2_HIGHCPU_8'
+ 
 timeout: '3600s'
+ 
