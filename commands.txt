@@ -21,3 +21,5 @@ curl -X POST https://translation-api-1050963407386.us-central1.run.app/translate
 curl -X POST https://translation-api-1050963407386.us-central1.run.app/translate \
   -H "Content-Type: application/json" \
   -d '{"text": "El contrato debe ser firmado antes del viernes.", "direction": "es_to_en", "domain": "legal"}'
+
+  pre github actions
