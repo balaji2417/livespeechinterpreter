@@ -22,3 +22,4 @@ airflow.cfg
 # OS
 .DS_Store
 gcp-key.json
+node_modules/
