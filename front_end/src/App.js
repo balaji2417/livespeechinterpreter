@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const API_BASE = "https://translation-api-1050963407386.us-central1.run.app";
@@ -45,6 +46,7 @@ export default function TranslationApp() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [supported, setSupported] = useState(true);
+  const [autoSpeak, setAutoSpeak] = useState(true);
 
   // Live transcript lines: [{ source: "...", translated: "...", pending: bool }]
   const [lines, setLines] = useState([]);
@@ -113,6 +115,30 @@ export default function TranslationApp() {
     return () => document.head.removeChild(style);
   }, []);
 
+  const speakText = useCallback((text, langCode) => {
+    if (!autoSpeakRef.current) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const langMap = { en: "en-US", es: "es-ES" };
+    utterance.lang = langMap[langCode] || "en-US";
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    // Try to find a matching voice
+    const voices = window.speechSynthesis.getVoices();
+    const match = voices.find((v) => v.lang.startsWith(langCode));
+    if (match) utterance.voice = match;
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const autoSpeakRef = useRef(autoSpeak);
+  useEffect(() => { autoSpeakRef.current = autoSpeak; }, [autoSpeak]);
+
+  // Preload voices
+  useEffect(() => {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }, []);
+
   const translateLine = useCallback(async (text, lineIndex) => {
     const direction = `${sourceLangRef.current}_to_${targetLangRef.current}`;
     try {
@@ -128,10 +154,11 @@ export default function TranslationApp() {
       const data = await res.json();
       const translated = data.translated_text || data.translation || JSON.stringify(data);
       setLines((prev) => prev.map((l, i) => i === lineIndex ? { ...l, translated, pending: false } : l));
+      speakText(translated, targetLangRef.current);
     } catch (e) {
       setLines((prev) => prev.map((l, i) => i === lineIndex ? { ...l, translated: `⚠️ ${e.message}`, pending: false } : l));
     }
-  }, []);
+  }, [speakText]);
 
   const startRecording = () => {
     if (!recognitionRef.current) return;
@@ -312,6 +339,16 @@ export default function TranslationApp() {
             </span>
           )}
 
+          {/* Auto-speak toggle */}
+          <button onClick={() => setAutoSpeak(!autoSpeak)} style={{
+            ...baseBtn, padding: "6px 12px", borderRadius: 8,
+            background: autoSpeak ? "rgba(16,185,129,0.15)" : "rgba(30,41,59,0.6)",
+            border: `1px solid ${autoSpeak ? "rgba(16,185,129,0.35)" : colors.border}`,
+            color: autoSpeak ? colors.emerald : colors.textMuted, fontSize: 12,
+          }}>
+            {autoSpeak ? "🔊 Auto-speak ON" : "🔇 Auto-speak OFF"}
+          </button>
+
           {lines.length > 0 && !isRecording && (
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={copyAll} style={{ ...baseBtn, padding: "6px 12px", borderRadius: 8, background: "rgba(30,41,59,0.6)", border: `1px solid ${colors.border}`, color: colors.textMuted, fontSize: 12 }}>
@@ -370,7 +407,14 @@ export default function TranslationApp() {
                     <span style={{ display: "inline-block", animation: "spin 1s linear infinite" }}>⟳</span> Translating...
                   </span>
                 ) : (
-                  <span style={{ color: "rgba(167,243,208,0.9)" }}>{line.translated}</span>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <span style={{ color: "rgba(167,243,208,0.9)", flex: 1 }}>{line.translated}</span>
+                    <button onClick={() => speakText(line.translated, targetLang)} style={{
+                      ...baseBtn, padding: "4px 6px", borderRadius: 6, background: "rgba(16,185,129,0.1)",
+                      border: `1px solid rgba(16,185,129,0.25)`, color: colors.emerald, fontSize: 14,
+                      flexShrink: 0, marginTop: 2,
+                    }}>🔊</button>
+                  </div>
                 )}
               </div>
             </div>
