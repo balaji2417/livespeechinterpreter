@@ -16,7 +16,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
-import StarfieldBackground from "@/components/StarfieldBackground";
+import StarfieldBackground from "@/components/starFieldBackground";
 import vistaLogo from "@/assets/vista-logo.png";
 import vistaLogoDark from "@/assets/vista-logo-dark.png";
 
