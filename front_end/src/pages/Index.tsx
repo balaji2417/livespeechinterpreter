@@ -197,12 +197,12 @@ const Index = () => {
             {summaryLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Generating summary...
+                Interpreting...
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                Summarize with AI
+                Interpret
               </>
             )}
           </button>
@@ -227,7 +227,7 @@ const Index = () => {
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-sm font-semibold text-foreground">
-                  AI Summary
+                  Interpretation
                 </span>
                 <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                   Powered by Gemini
@@ -249,7 +249,7 @@ const Index = () => {
                     {languageLabels[sourceLanguage].code}
                   </span>
                   <span className="text-xs font-medium text-muted-foreground">
-                    Source Summary
+                    Source Interpretation
                   </span>
                 </div>
                 <p className="text-sm text-foreground/90 leading-relaxed">
@@ -262,7 +262,7 @@ const Index = () => {
                     {languageLabels[targetLanguage].code}
                   </span>
                   <span className="text-xs font-medium text-muted-foreground">
-                    Translation Summary
+                    Translation Interpretation
                   </span>
                 </div>
                 <p className="text-sm text-foreground/90 leading-relaxed">

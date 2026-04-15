@@ -39,9 +39,9 @@ export function useSummarize() {
       setError("");
       setSummary(null);
 
-      const prompt = `You are a professional summarizer for ${domain} domain conversations.
+      const prompt = `You are a professional interpreter specializing in ${domain} domain conversations between ${sourceLang} and ${targetLang}.
 
-Given the following conversation that was spoken in ${sourceLang} and translated to ${targetLang}, provide two concise summaries:
+Given the following conversation, provide a clear interpretation and contextual summary for both the original and translated texts. Highlight any key terms, intent, and important context.
 
 ORIGINAL TEXT (${sourceLang}):
 ${sourceText}
@@ -50,7 +50,7 @@ TRANSLATED TEXT (${targetLang}):
 ${translatedText}
 
 Respond in this exact JSON format only, no markdown, no backticks:
-{"sourceSummary": "A 2-3 sentence summary of the original ${sourceLang} text", "translatedSummary": "A 2-3 sentence summary of the translated ${targetLang} text"}`;
+{"sourceSummary": "A 2-3 sentence interpretation of the original ${sourceLang} text highlighting key intent and context", "translatedSummary": "A 2-3 sentence interpretation of the ${targetLang} translation highlighting accuracy and key terms used"}`;
 
       try {
         const res = await fetch(GEMINI_URL, {
