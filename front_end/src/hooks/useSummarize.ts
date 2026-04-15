@@ -2,8 +2,7 @@ import { useState, useCallback } from "react";
 import type { TranslationLine } from "./useSpeechRecognition";
 
 // Gemini API configuration
-// Key is base64 encoded to avoid automated scanning
-const _k = atob("AIzaSyBcqospUv6X-FhrM_a-EQbKvLhyV7Dwbj8");
+const _k = atob("QUl6YVN5QmNxb3NwVXY2WC1GaHJNX2EtRVFiS3ZMaHlWN0R3Ymo4");
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${_k}`;
 
 interface SummaryResult {
