@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
 import type { TranslationLine } from "./useSpeechRecognition";
-
-// Gemini API configuration
 import { getGeminiKey, GEMINI_URL as BASE_GEMINI_URL } from "@/lib/config";
+
 const GEMINI_URL = `${BASE_GEMINI_URL}?key=${getGeminiKey()}`;
 
 interface SummaryResult {
@@ -31,7 +30,7 @@ export function useSummarize() {
         .join("\n");
 
       if (!sourceText.trim() || !translatedText.trim()) {
-        setError("No text to summarize yet.");
+        setError("No text to interpret yet.");
         return;
       }
 
@@ -39,22 +38,30 @@ export function useSummarize() {
       setError("");
       setSummary(null);
 
+      const sourceLines = sourceText.split("\n");
+      const translatedLines = translatedText.split("\n");
+
       const prompt = `You are a professional interpreter specializing in ${domain} domain conversations between ${sourceLang} and ${targetLang}.
 
-Given the following complete conversation with ${sourceText.split("\n").length} segments, provide a comprehensive interpretation covering ALL segments.
+Given the following complete conversation with ${String(sourceLines.length)} segments, provide a comprehensive interpretation.
 
 COMPLETE CONVERSATION (${sourceLang}):
-${sourceText.split("\n").map((line: string, i: number) => `${i + 1}. ${line}`).join("\n")}
+${sourceLines.map((line, i) => `${i + 1}. ${line}`).join("\n")}
 
 TRANSLATIONS (${targetLang}):
-${translatedText.split("\n").map((line: string, i: number) => `${i + 1}. ${line}`).join("\n")}
+${translatedLines.map((line, i) => `${i + 1}. ${line}`).join("\n")}
 
 Rules:
-- Cover EVERY segment in your interpretation, not just the first one
-- Explain the speaker's overall intent, tone, and key context across all segments
-- Note any important domain-specific terminology
-- Write 3-5 clear sentences
-- Do NOT use any special formatting, just plain text`;
+- Provide TWO interpretations
+- First: Write the interpretation in ${sourceLang} covering ALL segments - explain the speaker's overall intent, tone, key context, and any important domain-specific terminology (3-5 sentences)
+- Second: Write the same interpretation in ${targetLang} (3-5 sentences)
+- Use this exact format:
+
+${sourceLang.toUpperCase()}:
+[Interpretation in ${sourceLang}]
+
+${targetLang.toUpperCase()}:
+[Same interpretation in ${targetLang}]`;
 
       try {
         const res = await fetch(GEMINI_URL, {
@@ -68,7 +75,7 @@ Rules:
             ],
             generationConfig: {
               temperature: 0.3,
-              maxOutputTokens: 500,
+              maxOutputTokens: 8192,
             },
           }),
         });
@@ -81,7 +88,7 @@ Rules:
         }
 
         const data = await res.json();
-        
+
         // Extract text from all parts
         const parts = data?.candidates?.[0]?.content?.parts || [];
         const text = parts
@@ -98,9 +105,31 @@ Rules:
           .replace(/\*\*/g, "")
           .trim();
 
-        setSummary({ sourceSummary: cleaned, translatedSummary: "" });
+        // Parse source and target language sections
+        let sourceSummary = "";
+        let translatedSummary = "";
+
+        const srcLang = sourceLang.toUpperCase();
+        const tgtLang = targetLang.toUpperCase();
+
+        const srcMatch = cleaned.match(
+          new RegExp(`${srcLang}[:\\s]*\\n+([\\s\\S]*?)(?=\\n*${tgtLang}[:\\s]*\\n|$)`, "i")
+        );
+        const tgtMatch = cleaned.match(
+          new RegExp(`${tgtLang}[:\\s]*\\n+([\\s\\S]*)$`, "i")
+        );
+
+        if (srcMatch) sourceSummary = srcMatch[1].trim();
+        if (tgtMatch) translatedSummary = tgtMatch[1].trim();
+
+        // Fallback: if parsing failed, use full text as source
+        if (!sourceSummary && !translatedSummary) {
+          sourceSummary = cleaned;
+        }
+
+        setSummary({ sourceSummary, translatedSummary });
       } catch (e: any) {
-        setError(e.message || "Failed to generate summary");
+        setError(e.message || "Failed to generate interpretation");
       } finally {
         setLoading(false);
       }
