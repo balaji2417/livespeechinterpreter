@@ -43,7 +43,7 @@ export function useSummarize() {
 
       const prompt = `You are a professional interpreter specializing in ${domain} domain conversations between ${sourceLang} and ${targetLang}.
 
-Given the following complete conversation with ${String(sourceLines.length)} segments, provide a comprehensive interpretation.
+Given the following complete conversation with ${String(sourceLines.length)} segments, provide a comprehensive interpretation written entirely in ${targetLang}.
 
 COMPLETE CONVERSATION (${sourceLang}):
 ${sourceLines.map((line, i) => `${i + 1}. ${line}`).join("\n")}
@@ -52,16 +52,11 @@ TRANSLATIONS (${targetLang}):
 ${translatedLines.map((line, i) => `${i + 1}. ${line}`).join("\n")}
 
 Rules:
-- Provide TWO interpretations
-- First: Write the interpretation in ${sourceLang} covering ALL segments - explain the speaker's overall intent, tone, key context, and any important domain-specific terminology (3-5 sentences)
-- Second: Write the same interpretation in ${targetLang} (3-5 sentences)
-- Use this exact format:
-
-${sourceLang.toUpperCase()}:
-[Interpretation in ${sourceLang}]
-
-${targetLang.toUpperCase()}:
-[Same interpretation in ${targetLang}]`;
+- Write the ENTIRE interpretation in ${targetLang} only
+- Cover ALL segments in your interpretation
+- Explain the speaker's overall intent, tone, key context, and any important domain-specific terminology
+- Write 3-5 clear sentences
+- Do NOT use any special formatting, headers, or labels — just plain text in ${targetLang}`;
 
       try {
         const res = await fetch(GEMINI_URL, {
@@ -105,29 +100,7 @@ ${targetLang.toUpperCase()}:
           .replace(/\*\*/g, "")
           .trim();
 
-        // Parse source and target language sections
-        let sourceSummary = "";
-        let translatedSummary = "";
-
-        const srcLang = sourceLang.toUpperCase();
-        const tgtLang = targetLang.toUpperCase();
-
-        const srcMatch = cleaned.match(
-          new RegExp(`${srcLang}[:\\s]*\\n+([\\s\\S]*?)(?=\\n*${tgtLang}[:\\s]*\\n|$)`, "i")
-        );
-        const tgtMatch = cleaned.match(
-          new RegExp(`${tgtLang}[:\\s]*\\n+([\\s\\S]*)$`, "i")
-        );
-
-        if (srcMatch) sourceSummary = srcMatch[1].trim();
-        if (tgtMatch) translatedSummary = tgtMatch[1].trim();
-
-        // Fallback: if parsing failed, use full text as source
-        if (!sourceSummary && !translatedSummary) {
-          sourceSummary = cleaned;
-        }
-
-        setSummary({ sourceSummary, translatedSummary });
+        setSummary({ sourceSummary: cleaned, translatedSummary: "" });
       } catch (e: any) {
         setError(e.message || "Failed to generate interpretation");
       } finally {

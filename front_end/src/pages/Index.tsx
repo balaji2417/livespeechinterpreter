@@ -184,8 +184,8 @@ const Index = () => {
         </div>
       )}
 
-      {/* Summarize button */}
-      {lines.length > 0 && !isRecording && lines.some((l) => !l.pending) && (
+      {/* Summarize button — only when ALL translations are done */}
+      {lines.length > 0 && !isRecording && lines.length > 0 && lines.every((l) => !l.pending) && (
         <div className="mx-auto max-w-5xl px-6 pb-2 flex justify-center">
           <button
             onClick={() =>
@@ -242,7 +242,15 @@ const Index = () => {
             </div>
 
             {/* Summary content */}
-            <div className="p-4">
+            <div className="p-4 max-h-[200px] overflow-y-auto">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded uppercase">
+                  {languageLabels[targetLanguage].code}
+                </span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {languageLabels[targetLanguage].name}
+                </span>
+              </div>
               <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
                 {summary.sourceSummary || "No interpretation available"}
               </p>
