@@ -4,8 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-ARG VITE_GEMINI_API_KEY
-ENV VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
+# Ensure env file is available for Vite build
+RUN if [ -f .env.production ]; then echo "Found .env.production"; else echo "No .env.production found"; fi
 RUN npm run build
 
 # Serve stage

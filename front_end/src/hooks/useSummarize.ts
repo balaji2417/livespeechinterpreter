@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import type { TranslationLine } from "./useSpeechRecognition";
 
 // Gemini API configuration
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_KEY = "AIzaSyChF4Yue5Rm16uHeiSZa6no6-_In5STG20";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 interface SummaryResult {
