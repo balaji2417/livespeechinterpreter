@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { Home } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import vistaLogo from "@/assets/vista-logo.png";
 import vistaLogoDark from "@/assets/vista-logo-dark.png";
@@ -8,6 +10,7 @@ interface VistaHeaderProps {
 }
 
 const VistaHeader = ({ apiStatus = "checking" }: VistaHeaderProps) => {
+  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark")
   );
@@ -58,6 +61,13 @@ const VistaHeader = ({ apiStatus = "checking" }: VistaHeaderProps) => {
       </div>
       <div className="flex items-center gap-3">
         <ThemeToggle />
+        <button
+          onClick={() => navigate("/")}
+          className="w-8 h-8 rounded-full flex items-center justify-center border border-border bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          title="Back to Home"
+        >
+          <Home className="w-4 h-4" />
+        </button>
         <div className="flex items-center gap-1.5">
           <div className={`w-1.5 h-1.5 rounded-full ${statusColor} animate-pulse`} />
           <span className="text-xs text-muted-foreground font-medium">{statusLabel}</span>
