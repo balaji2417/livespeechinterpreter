@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import vistaLogo from "@/assets/vista-logo.png";
 import vistaLogoDark from "@/assets/vista-logo-dark.png";
@@ -41,7 +42,15 @@ const VistaHeader = ({ apiStatus = "checking" }: VistaHeaderProps) => {
 
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-card">
-      <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/")}>
+      <div className="flex items-center gap-2.5">
+        <button
+          onClick={() => navigate("/")}
+          className="w-8 h-8 rounded-lg flex items-center justify-center border border-border bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all hover:scale-105 active:scale-95"
+          title="Back to Home"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <div className="w-px h-5 bg-border/60" />
         <img
           src={isDark ? vistaLogoDark : vistaLogo}
           alt="VISTA logo"
