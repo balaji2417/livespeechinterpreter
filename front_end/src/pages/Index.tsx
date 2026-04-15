@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { ArrowLeftRight, Volume2, Settings, ChevronDown } from "lucide-react";
+import { ArrowLeftRight, Volume2, Settings, ChevronDown, Sparkles, Loader2, X } from "lucide-react";
 import VistaHeader from "@/components/VistaHeader";
 import LanguagePanel from "@/components/LanguagePanel";
 import MicButton from "@/components/MicButton";
 import WaveformVisualizer from "@/components/WaveformVisualizer";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useSummarize } from "@/hooks/useSummarize";
 
 const API_BASE = "https://translation-api-1050963407386.us-central1.run.app";
 
@@ -31,6 +32,14 @@ const Index = () => {
   >("checking");
   const [copied, setCopied] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
+
+  const {
+    summary,
+    loading: summaryLoading,
+    error: summaryError,
+    summarize,
+    clearSummary,
+  } = useSummarize();
 
   const targetLanguage =
     sourceLanguage === "english" ? "spanish" : "english";
@@ -171,6 +180,96 @@ const Index = () => {
         <div className="mx-auto max-w-5xl px-6 pb-2">
           <div className="bg-destructive/10 border border-destructive/25 rounded-lg px-4 py-2 text-center">
             <span className="text-sm text-destructive">{error}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Summarize button */}
+      {lines.length > 0 && !isRecording && lines.some((l) => !l.pending) && (
+        <div className="mx-auto max-w-5xl px-6 pb-2 flex justify-center">
+          <button
+            onClick={() =>
+              summarize(lines, sourceLanguage, targetLanguage, domain)
+            }
+            disabled={summaryLoading}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary/10 border border-primary/30 text-primary text-sm font-medium hover:bg-primary/20 transition-all disabled:opacity-50"
+          >
+            {summaryLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating summary...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Summarize with AI
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Summary error */}
+      {summaryError && (
+        <div className="mx-auto max-w-5xl px-6 pb-2">
+          <div className="bg-destructive/10 border border-destructive/25 rounded-lg px-4 py-2 text-center">
+            <span className="text-sm text-destructive">{summaryError}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Summary panel */}
+      {summary && (
+        <div className="mx-auto max-w-5xl px-6 pb-4">
+          <div className="border border-primary/20 rounded-xl bg-card overflow-hidden">
+            {/* Summary header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-primary/5">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-foreground">
+                  AI Summary
+                </span>
+                <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                  Powered by Gemini
+                </span>
+              </div>
+              <button
+                onClick={clearSummary}
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Summary content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-border/40">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded uppercase">
+                    {languageLabels[sourceLanguage].code}
+                  </span>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Source Summary
+                  </span>
+                </div>
+                <p className="text-sm text-foreground/90 leading-relaxed">
+                  {summary.sourceSummary}
+                </p>
+              </div>
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded uppercase">
+                    {languageLabels[targetLanguage].code}
+                  </span>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Translation Summary
+                  </span>
+                </div>
+                <p className="text-sm text-foreground/90 leading-relaxed">
+                  {summary.translatedSummary}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
