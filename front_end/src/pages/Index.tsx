@@ -7,7 +7,7 @@ import WaveformVisualizer from "@/components/WaveformVisualizer";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useSummarize } from "@/hooks/useSummarize";
 
-const API_BASE = "https://translation-api-gpu-1050963407386.us-east4.run.app/";
+const API_BASE = "https://translation-api-1050963407386.us-central1.run.app";
 
 
 const DOMAINS = [
