@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
 import type { TranslationLine } from "./useSpeechRecognition";
 
-// Reads from environment variable set at build time
+// Gemini API configuration
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 interface SummaryResult {
   sourceSummary: string;
