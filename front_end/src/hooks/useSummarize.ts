@@ -77,15 +77,27 @@ Respond in this exact JSON format only, no markdown, no backticks:
         }
 
         const data = await res.json();
-        const text =
-          data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        
+        // Extract text from all parts (skip thinking parts)
+        const parts = data?.candidates?.[0]?.content?.parts || [];
+        const text = parts
+          .filter((p: any) => p.text && !p.thought)
+          .map((p: any) => p.text)
+          .join("");
 
-        // Parse JSON from response
+        if (!text) throw new Error("No response from Gemini");
+
+        // Parse JSON from response — handle markdown fences and extra whitespace
         const cleaned = text
-          .replace(/```json/g, "")
-          .replace(/```/g, "")
+          .replace(/```json\s*/g, "")
+          .replace(/```\s*/g, "")
           .trim();
-        const parsed: SummaryResult = JSON.parse(cleaned);
+        
+        // Find the JSON object in the response
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("Could not parse interpretation response");
+        
+        const parsed: SummaryResult = JSON.parse(jsonMatch[0]);
         setSummary(parsed);
       } catch (e: any) {
         setError(e.message || "Failed to generate summary");
