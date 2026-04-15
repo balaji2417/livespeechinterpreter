@@ -81,24 +81,26 @@ Respond in this exact JSON format only, no markdown, no backticks:
         // Extract text from all parts (skip thinking parts)
         const parts = data?.candidates?.[0]?.content?.parts || [];
         const text = parts
-          .filter((p: any) => p.text && !p.thought)
+          .filter((p: any) => p.text)
           .map((p: any) => p.text)
-          .join("");
+          .join("\n");
 
         if (!text) throw new Error("No response from Gemini");
 
-        // Parse JSON from response — handle markdown fences and extra whitespace
-        const cleaned = text
-          .replace(/```json\s*/g, "")
-          .replace(/```\s*/g, "")
-          .trim();
+        // Try to find JSON in the response
+        const jsonMatch = text.match(/\{[\s\S]*?"sourceSummary"[\s\S]*?"translatedSummary"[\s\S]*?\}/);
         
-        // Find the JSON object in the response
-        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("Could not parse interpretation response");
-        
-        const parsed: SummaryResult = JSON.parse(jsonMatch[0]);
-        setSummary(parsed);
+        if (jsonMatch) {
+          const parsed: SummaryResult = JSON.parse(jsonMatch[0]);
+          setSummary(parsed);
+        } else {
+          // Fallback: treat entire response as plain text interpretation
+          const lines = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+          setSummary({
+            sourceSummary: lines,
+            translatedSummary: "",
+          });
+        }
       } catch (e: any) {
         setError(e.message || "Failed to generate summary");
       } finally {
