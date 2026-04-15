@@ -7,7 +7,7 @@ import WaveformVisualizer from "@/components/WaveformVisualizer";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useSummarize } from "@/hooks/useSummarize";
 
-const API_BASE = "https://translation-api-gpu-1050963407386.us-east4.run.app";
+const API_BASE = "https://translation-api-1050963407386.us-central1.run.app";
 
 const DOMAINS = [
   { id: "general", label: "General", icon: "💬" },
@@ -242,33 +242,10 @@ const Index = () => {
             </div>
 
             {/* Summary content */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-border/40">
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded uppercase">
-                    {languageLabels[sourceLanguage].code}
-                  </span>
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Source Interpretation
-                  </span>
-                </div>
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
-                  {summary.sourceSummary || "No interpretation available"}
-                </p>
-              </div>
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded uppercase">
-                    {languageLabels[targetLanguage].code}
-                  </span>
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Translation Interpretation
-                  </span>
-                </div>
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
-                  {summary.translatedSummary || "No interpretation available"}
-                </p>
-              </div>
+            <div className="p-4">
+              <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+                {summary.sourceSummary || "No interpretation available"}
+              </p>
             </div>
           </div>
         </div>
