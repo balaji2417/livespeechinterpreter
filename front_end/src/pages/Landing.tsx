@@ -5,6 +5,8 @@ import {
   Globe,
   Zap,
   Shield,
+  ShieldCheck,
+  Lock,
   ArrowRight,
   Stethoscope,
   Scale,
@@ -42,66 +44,125 @@ const Landing = () => {
       {/* Animated starfield */}
       <StarfieldBackground />
 
-      {/* ─── Navbar ─── */}
-      <nav className="sticky top-0 z-50 border-b border-border/50 bg-card/60 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-2.5">
-            <img
-              src={isDark ? vistaLogoDark : vistaLogo}
-              alt="VISTA"
-              className="w-8 h-8"
-            />
-            <span className="text-base font-bold tracking-tight">VISTA</span>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#domains" className="hover:text-foreground transition-colors">Domains</a>
-            <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
-            <a href="#architecture" className="hover:text-foreground transition-colors">Architecture</a>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <button
-              onClick={() => navigate("/translate")}
-              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20"
-            >
-              Launch App
-            </button>
-          </div>
-        </div>
-      </nav>
+{/* ─── Navbar ─── */}
+<nav className="sticky top-0 z-50 border-b border-white/10 bg-background/55 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/45 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+  <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-8 py-4 md:py-5">
+    
+    {/* Logo */}
+    <div className="flex items-center gap-3 md:gap-4">
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full bg-primary/20 blur-lg" />
+        <img
+          src={isDark ? vistaLogoDark : vistaLogo}
+          alt="VISTA"
+          className="relative w-11 h-11 md:w-14 md:h-14 rounded-xl object-contain"
+        />
+      </div>
+      <div className="flex flex-col leading-none">
+        <span className="text-lg md:text-2xl font-extrabold tracking-tight text-foreground">
+          VISTA
+        </span>
+        <span className="hidden md:block text-[11px] uppercase tracking-[0.22em] text-muted-foreground mt-1">
+          Real-time voice translation
+        </span>
+      </div>
+    </div>
 
+    {/* Nav Links */}
+    <div className="hidden md:flex items-center gap-8 lg:gap-10 text-sm md:text-base font-medium text-muted-foreground">
+      <a
+        href="#features"
+        className="hover:text-foreground transition-all hover:scale-105"
+      >
+        Features
+      </a>
+      <a
+        href="#domains"
+        className="hover:text-foreground transition-all hover:scale-105"
+      >
+        Domains
+      </a>
+      <a
+        href="#how-it-works"
+        className="hover:text-foreground transition-all hover:scale-105"
+      >
+        How It Works
+      </a>
+      <a
+        href="#architecture"
+        className="hover:text-foreground transition-all hover:scale-105"
+      >
+        Architecture
+      </a>
+
+      {/* ✅ Dashboard (ONLY ONCE) */}
+<a
+  href="#dashboard"
+  className="hover:text-foreground transition-all hover:scale-105"
+>
+  Dashboard
+</a>
+    </div>
+
+    {/* Right side */}
+    <div className="flex items-center gap-3 md:gap-4">
+      <div className="scale-110 md:scale-125">
+        <ThemeToggle />
+      </div>
+
+      {/* Launch */}
+      <button
+        onClick={() => navigate("/translate")}
+        className="group inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 rounded-xl bg-primary text-primary-foreground text-sm md:text-base font-semibold transition-all duration-300 shadow-[0_0_25px_rgba(255,165,0,0.22)] hover:bg-primary/90 hover:scale-[1.03] active:scale-[0.98]"
+      >
+        Launch App
+        <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+      </button>
+    </div>
+
+  </div>
+</nav>
       {/* ─── Hero ─── */}
       <section className="relative overflow-hidden z-10">
         {/* Background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] bg-primary/3 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-4xl mx-auto text-center px-6 pt-24 pb-20">
+        <div className="relative max-w-5xl mx-auto text-center px-6 pt-24 pb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted/50 text-xs text-muted-foreground mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
             Real-time voice translation is live
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
-            Break Language Barriers{" "}
-            <span className="text-primary">Instantly</span>
-          </h1>
+          <div className="mb-8">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight mb-4">
+              Break Language Barriers{" "}
+              <span className="text-primary">Instantly</span>
+            </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            VISTA listens, transcribes, and translates your speech in real-time
-            with domain-aware precision for medical, legal, and general
-            conversations.
-          </p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-3">
+              with <span className="text-primary">VISTA</span>
+            </h2>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <p className="text-sm md:text-base text-white/80 max-w-3xl mx-auto tracking-wide">
+              Voice-based Interpretation & Streaming Translation Architecture
+            </p>
+
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-4 leading-relaxed">
+              VISTA listens, transcribes, and translates your speech in
+              real-time with domain-aware precision for medical, legal, and
+              general conversations.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <button
               onClick={() => navigate("/translate")}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98]"
+              className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(255,165,0,0.3)] hover:shadow-[0_0_40px_rgba(255,165,0,0.5)] hover:scale-[1.04] active:scale-[0.98]"
             >
               <Mic className="w-5 h-5" />
               Start Translating
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </button>
             <a
               href="#how-it-works"
@@ -111,8 +172,36 @@ const Landing = () => {
             </a>
           </div>
 
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            Built for healthcare & legal workflows
+          </p>
+
+          {/* Compliance badges */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-border/70 bg-card/70 backdrop-blur-sm">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="text-sm font-medium text-foreground">
+                HIPAA Ready
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-border/70 bg-card/70 backdrop-blur-sm">
+              <Lock className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-medium text-foreground">
+                GDPR Ready
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-border/70 bg-card/70 backdrop-blur-sm">
+              <Shield className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">
+                Privacy First
+              </span>
+            </div>
+          </div>
+
           {/* Stats bar */}
-          <div className="flex items-center justify-center gap-8 md:gap-12 mt-16 pt-8 border-t border-border/50">
+          <div className="flex items-center justify-center gap-8 md:gap-12 pt-8 border-t border-border/50">
             {[
               { label: "Languages", value: "EN ↔ ES" },
               { label: "Domains", value: "3" },
@@ -183,7 +272,7 @@ const Landing = () => {
             ].map((feature) => (
               <div
                 key={feature.title}
-                className="group p-6 rounded-xl border border-border/60 bg-card hover:border-primary/30 hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.1)] transition-all duration-300"
+                className="group p-6 rounded-xl border border-border/60 bg-card hover:border-primary/30 hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.1)] hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
                   <feature.icon className="w-5 h-5 text-primary" />
@@ -200,6 +289,125 @@ const Landing = () => {
         </div>
       </section>
 
+    <section id="dashboard" className="py-20 px-6 relative z-10">
+  <div className="max-w-7xl mx-auto">
+    
+    {/* Header */}
+    <div className="text-center mb-12">
+      <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3">
+        Dashboard
+      </p>
+      <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+        Live Interpretation Overview
+      </h2>
+      <p className="text-muted-foreground max-w-2xl mx-auto">
+        A simple view of active sessions, language pairs, domains, and recent translation activity.
+      </p>
+    </div>
+
+    {/* Top Cards */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+      {[
+        { label: "Active Session", value: "Live", highlight: true },
+        { label: "Language Pair", value: "English → Spanish" },
+        { label: "Mode", value: "Medical" },
+        { label: "Voice Output", value: "Enabled" },
+      ].map((item) => (
+        <div
+          key={item.label}
+          className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6 shadow-sm hover:-translate-y-1 transition-all duration-300"
+        >
+          <p className="text-sm text-muted-foreground mb-2">{item.label}</p>
+
+          {/* Special Live UI */}
+          {item.highlight ? (
+            <div className="flex items-center gap-3">
+              {/* Live badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-sm font-medium">
+                <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                Live
+              </div>
+
+              {/* Green button */}
+              <button className="px-4 py-1.5 rounded-full bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]">
+                Active
+              </button>
+            </div>
+          ) : (
+            <h3 className="text-xl md:text-2xl font-bold text-foreground">
+              {item.value}
+            </h3>
+          )}
+        </div>
+      ))}
+    </div>
+
+    {/* Main Grid */}
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      
+      {/* Recent Sessions */}
+      <div className="xl:col-span-2 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6">
+        <h3 className="text-xl font-bold tracking-tight mb-4">
+          Recent Sessions
+        </h3>
+
+        <div className="space-y-4">
+          {[
+            "Patient Intake Conversation",
+            "Contract Review Discussion",
+            "General Support Session",
+          ].map((title) => (
+            <div
+              key={title}
+              className="rounded-xl border border-border/50 bg-background/40 p-4 hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <p className="font-medium text-foreground">{title}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                English → Spanish • Domain-aware interpretation
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Trust & Privacy */}
+      <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6">
+        <h3 className="text-xl font-bold tracking-tight mb-4">
+          Trust & Privacy
+        </h3>
+
+        <div className="space-y-3">
+          {[
+            {
+              title: "HIPAA Ready",
+              desc: "Designed for healthcare-focused privacy workflows.",
+            },
+            {
+              title: "GDPR Ready",
+              desc: "Supports privacy-first global usage.",
+            },
+            {
+              title: "Privacy First",
+              desc: "Secure handling of interpreted sessions.",
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="rounded-xl border border-border/50 bg-background/40 p-4 hover:border-primary/30 transition-all"
+            >
+              <p className="font-medium text-foreground">{item.title}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+      
       {/* ─── Domains ─── */}
       <section id="domains" className="py-20 px-6 bg-muted/30 relative z-10">
         <div className="max-w-6xl mx-auto">
@@ -211,7 +419,7 @@ const Landing = () => {
               Specialized Translation Modes
             </h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-              VISTA doesn't just translate words — it understands context.
+              VISTA doesn&apos;t just translate words — it understands context.
               Choose a domain for terminology-accurate results.
             </p>
           </div>
@@ -230,7 +438,8 @@ const Landing = () => {
                 icon: Stethoscope,
                 title: "Medical",
                 desc: "Clinical terminology, patient communication, and healthcare vocabulary with precise accuracy.",
-                example: '"The patient requires surgery" → "El paciente requiere cirugía"',
+                example:
+                  '"The patient requires surgery" → "El paciente requiere cirugía"',
                 color: "text-emerald-500",
                 bg: "bg-emerald-500/10",
               },
@@ -238,14 +447,15 @@ const Landing = () => {
                 icon: Scale,
                 title: "Legal",
                 desc: "Legal terminology, contracts, court proceedings, and formal documentation language.",
-                example: '"The contract must be signed" → "El contrato debe ser firmado"',
+                example:
+                  '"The contract must be signed" → "El contrato debe ser firmado"',
                 color: "text-amber-500",
                 bg: "bg-amber-500/10",
               },
             ].map((d) => (
               <div
                 key={d.title}
-                className="p-6 rounded-xl border border-border/60 bg-card hover:border-primary/20 transition-all"
+                className="p-6 rounded-xl border border-border/60 bg-card hover:border-primary/20 hover:-translate-y-1 transition-all duration-300"
               >
                 <div
                   className={`w-12 h-12 rounded-xl ${d.bg} flex items-center justify-center mb-5`}
@@ -303,16 +513,13 @@ const Landing = () => {
               },
             ].map((s, i) => (
               <div key={s.step} className="flex gap-6 items-start">
-                {/* Timeline */}
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shrink-0">
                     <s.icon className="w-5 h-5 text-primary" />
                   </div>
-                  {i < 2 && (
-                    <div className="w-px h-16 bg-border mt-2" />
-                  )}
+                  {i < 2 && <div className="w-px h-16 bg-border mt-2" />}
                 </div>
-                {/* Content */}
+
                 <div className="pb-10">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest">
@@ -373,7 +580,7 @@ const Landing = () => {
             ].map((item) => (
               <div
                 key={item.title}
-                className="flex gap-4 p-5 rounded-xl border border-border/60 bg-card"
+                className="flex gap-4 p-5 rounded-xl border border-border/60 bg-card hover:border-primary/20 hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <item.icon className="w-5 h-5 text-primary" />
@@ -425,10 +632,30 @@ const Landing = () => {
             <span className="text-sm font-semibold">VISTA</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#domains" className="hover:text-foreground transition-colors">Domains</a>
-            <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
-            <a href="#architecture" className="hover:text-foreground transition-colors">Architecture</a>
+            <a
+              href="#features"
+              className="hover:text-foreground transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#domains"
+              className="hover:text-foreground transition-colors"
+            >
+              Domains
+            </a>
+            <a
+              href="#how-it-works"
+              className="hover:text-foreground transition-colors"
+            >
+              How It Works
+            </a>
+            <a
+              href="#architecture"
+              className="hover:text-foreground transition-colors"
+            >
+              Architecture
+            </a>
           </div>
           <p className="text-xs text-muted-foreground">
             © 2025 VISTA. All rights reserved.
