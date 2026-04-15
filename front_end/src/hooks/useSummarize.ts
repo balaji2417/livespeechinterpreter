@@ -2,8 +2,8 @@ import { useState, useCallback } from "react";
 import type { TranslationLine } from "./useSpeechRecognition";
 
 // Gemini API configuration
-const _k = atob("QUl6YVN5QmNxb3NwVXY2WC1GaHJNX2EtRVFiS3ZMaHlWN0R3Ymo4");
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${_k}`;
+import { getGeminiKey, GEMINI_URL as BASE_GEMINI_URL } from "@/lib/config";
+const GEMINI_URL = `${BASE_GEMINI_URL}?key=${getGeminiKey()}`;
 
 interface SummaryResult {
   sourceSummary: string;
