@@ -41,7 +41,7 @@ export function useSummarize() {
 
       const prompt = `You are a professional interpreter specializing in ${domain} domain conversations between ${sourceLang} and ${targetLang}.
 
-Given the following conversation, provide a clear interpretation and contextual summary for both the original and translated texts. Highlight any key terms, intent, and important context.
+Given the following conversation, provide a clear interpretation for both the original and translated texts.
 
 ORIGINAL TEXT (${sourceLang}):
 ${sourceText}
@@ -49,8 +49,18 @@ ${sourceText}
 TRANSLATED TEXT (${targetLang}):
 ${translatedText}
 
-Respond in this exact JSON format only, no markdown, no backticks:
-{"sourceSummary": "A 2-3 sentence interpretation of the original ${sourceLang} text highlighting key intent and context", "translatedSummary": "A 2-3 sentence interpretation of the ${targetLang} translation highlighting accuracy and key terms used"}`;
+Rules:
+- Write 2-3 clear sentences for each interpretation
+- For source: explain the speaker's intent, tone, and key context
+- For translation: evaluate accuracy, note any key terminology choices, and explain how it reads to a native speaker
+- Do NOT use JSON format
+- Use this exact format:
+
+SOURCE:
+[Your interpretation of the original text here]
+
+TRANSLATION:
+[Your interpretation of the translated text here]`;
 
       try {
         const res = await fetch(GEMINI_URL, {
@@ -78,29 +88,40 @@ Respond in this exact JSON format only, no markdown, no backticks:
 
         const data = await res.json();
         
-        // Extract text from all parts (skip thinking parts)
+        // Extract text from all parts
         const parts = data?.candidates?.[0]?.content?.parts || [];
         const text = parts
           .filter((p: any) => p.text)
           .map((p: any) => p.text)
-          .join("\n");
+          .join("\n")
+          .trim();
 
         if (!text) throw new Error("No response from Gemini");
 
-        // Try to find JSON in the response
-        const jsonMatch = text.match(/\{[\s\S]*?"sourceSummary"[\s\S]*?"translatedSummary"[\s\S]*?\}/);
-        
-        if (jsonMatch) {
-          const parsed: SummaryResult = JSON.parse(jsonMatch[0]);
-          setSummary(parsed);
-        } else {
-          // Fallback: treat entire response as plain text interpretation
-          const lines = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-          setSummary({
-            sourceSummary: lines,
-            translatedSummary: "",
-          });
+        // Parse SOURCE: and TRANSLATION: sections (flexible matching)
+        let sourceSummary = "";
+        let translatedSummary = "";
+
+        const sourceMatch = text.match(/SOURCE[:\s]*\n+([\s\S]*?)(?=\n*TRANSLATION[:\s]*\n|$)/i);
+        const transMatch = text.match(/TRANSLATION[:\s]*\n+([\s\S]*$)/i);
+
+        if (sourceMatch) sourceSummary = sourceMatch[1].trim();
+        if (transMatch) translatedSummary = transMatch[1].trim();
+
+        // Fallback: try JSON parsing if the above didn't work
+        if (!sourceSummary && !translatedSummary) {
+          const jsonMatch = text.match(/\{[\s\S]*?"sourceSummary"[\s\S]*?\}/);
+          if (jsonMatch) {
+            const cleaned = jsonMatch[0].replace(/```json\s*/g, "").replace(/```\s*/g, "");
+            const parsed = JSON.parse(cleaned);
+            sourceSummary = parsed.sourceSummary || "";
+            translatedSummary = parsed.translatedSummary || "";
+          } else {
+            sourceSummary = text;
+          }
         }
+
+        setSummary({ sourceSummary, translatedSummary });
       } catch (e: any) {
         setError(e.message || "Failed to generate summary");
       } finally {

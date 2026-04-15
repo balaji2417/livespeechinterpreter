@@ -9,7 +9,6 @@ import { useSummarize } from "@/hooks/useSummarize";
 
 const API_BASE = "https://translation-api-gpu-1050963407386.us-east4.run.app";
 
-
 const DOMAINS = [
   { id: "general", label: "General", icon: "💬" },
   { id: "medical", label: "Medical", icon: "🏥" },
@@ -253,8 +252,8 @@ const Index = () => {
                     Source Interpretation
                   </span>
                 </div>
-                <p className="text-sm text-foreground/90 leading-relaxed">
-                  {summary.sourceSummary}
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+                  {summary.sourceSummary || "No interpretation available"}
                 </p>
               </div>
               <div className="p-4">
@@ -266,8 +265,8 @@ const Index = () => {
                     Translation Interpretation
                   </span>
                 </div>
-                <p className="text-sm text-foreground/90 leading-relaxed">
-                  {summary.translatedSummary}
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+                  {summary.translatedSummary || "No interpretation available"}
                 </p>
               </div>
             </div>
