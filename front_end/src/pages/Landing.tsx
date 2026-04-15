@@ -289,7 +289,7 @@ const Landing = () => {
         </div>
       </section>
 
-    <section id="dashboard" className="py-20 px-6 relative z-10">
+<section id="dashboard" className="py-20 px-6 relative z-10">
   <div className="max-w-7xl mx-auto">
     
     {/* Header */}
@@ -407,7 +407,6 @@ const Landing = () => {
     </div>
   </div>
 </section>
-      
       {/* ─── Domains ─── */}
       <section id="domains" className="py-20 px-6 bg-muted/30 relative z-10">
         <div className="max-w-6xl mx-auto">
