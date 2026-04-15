@@ -9,6 +9,7 @@ import { useSummarize } from "@/hooks/useSummarize";
 
 const API_BASE = "https://translation-api-1050963407386.us-central1.run.app";
 
+
 const DOMAINS = [
   { id: "general", label: "General", icon: "💬" },
   { id: "medical", label: "Medical", icon: "🏥" },
